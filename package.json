@@ -1,0 +1,50 @@
+{
+    "name": "n8n-nodes-transcribe-com",
+    "version": "0.1.0",
+    "description": "Transcribe.com is an online service and processing API which allows to transcribe audio and video files and more!",
+    "license": "MIT",
+    "homepage": "https://transcribe.com",
+    "keywords": [
+        "n8n-community-node-package"
+    ],
+    "author": {
+        "name": "Transcribe.Com Team",
+        "email": "support@transcribe.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/transcribe-app/n8n-nodes-transcribe-com.git"
+    },
+   "scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+        "lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+    "files": [
+        "dist"
+    ],
+    "n8n": {
+        "n8nNodesApiVersion": 1,
+        "strict": true,
+        "credentials": [
+            "dist/credentials/TranscribeComApi.credentials.js"
+        ],
+        "nodes": [
+            "dist/nodes/TranscribeCom/TranscribeCom.node.js"
+        ]
+    },
+    "devDependencies": {
+        "@n8n/node-cli": "*",
+        "eslint": "9.32.0",
+        "prettier": "3.6.2",
+        "release-it": "^19.0.4",
+        "typescript": "5.9.2"
+    },
+    "peerDependencies": {
+        "n8n-workflow": "*"
+    }
+}
