@@ -1,6 +1,6 @@
 # n8n-nodes-transcribe-com
 
-This is an n8n community node. It lets you use [Transcribe.com](https://transcribe.com) your n8n workflows.
+This is an n8n community node. It lets you use [Transcribe.com](https://transcribe.com) service in your n8n workflows.
 
 Transcribe.com is an online service and processing API which allows to transcribe audio and video files and more!
 
