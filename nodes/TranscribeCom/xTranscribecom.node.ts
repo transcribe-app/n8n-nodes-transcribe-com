@@ -7,8 +7,22 @@ import type {
 	ICredentialTestFunctions,
 	INodeCredentialTestResult,
 } from 'n8n-workflow';
-import { IExecuteFunctions, NodeOperationError, NodeApiError, LoggerProxy as Logger } from 'n8n-workflow';
+import { IExecuteFunctions, NodeOperationError, NodeApiError, LoggerProxy as Logger, IHttpRequestOptions } from 'n8n-workflow';
 import { NodeConnectionTypes } from 'n8n-workflow';
+
+interface ITCRequestOptions {
+	url?: string | undefined;
+	headers?: IDataObject;
+	method?: string;
+	body?: FormData;
+	json?: boolean;
+}
+
+interface ITCResponse {
+	status?: string;
+	error?: string;
+	text?: string;
+}
 
 const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
 // const kTriggerAddOp = "http://localhost:3000/api/v1.1/n8n_node";
@@ -16,15 +30,14 @@ const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
 export class TranscribeCom implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Transcribe.Com',
-		name: 'transcribe-com',
+		name: 'transcribecom',
 		icon: 'file:transcribe-com.svg',
 		group: [],
 		version: 1,
 		subtitle: 'Convert audio/video to text',
 		description: 'Get transcription of audio of video file',
 		defaults: {
-			name: 'Transcribe.Com',
-			color: '#1774FF'
+			name: 'Transcribe.Com'
 		},
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
@@ -60,16 +73,16 @@ export class TranscribeCom implements INodeType {
 				type: 'options',
 				required: true,
 				options: [
-					{name: 'English',value: 'en'},
-					{name: 'German',value: 'de'},
-					{name: 'French',value: 'fr'},
-					{name: 'Italian',value: 'it'},
-					{name: 'Spanish',value: 'es'},
-					{name: 'Portuguese',value: 'pt'},
 					{name: 'Dutch',value: 'du'},
+					{name: 'English',value: 'en'},
+					{name: 'French',value: 'fr'},
+					{name: 'German',value: 'de'},
+					{name: 'Italian',value: 'it'},
 					{name: 'Japanese',value: 'ja'},
-					{name: 'Traditional Chinese',value: 'zh'},
+					{name: 'Portuguese',value: 'pt'},
 					{name: 'Russian',value: 'ru'},
+					{name: 'Spanish',value: 'es'},
+					{name: 'Traditional Chinese',value: 'zh'},
 				],
 				default: 'en',
 			},
@@ -123,19 +136,22 @@ export class TranscribeCom implements INodeType {
 			): Promise<INodeCredentialTestResult> {
 				const credentials = credential.data as IDataObject;
 				const apiKey = credentials.apiKey;
-				const options: any = {
+				const options: ITCRequestOptions = {
 					method: 'POST',
 					headers: {
 						Accept: 'application/json',
 					},
 					json: true,
 				};
-				var response:any = null;
+				let response:ITCResponse | null = null;
 				try{
-					response = await this.helpers.request(kTriggerAddOp+"?n8n_api_key="+apiKey, options)
-				} catch (error) {}
+					const httpRequest = this.helpers.request;
+					response = await httpRequest(kTriggerAddOp+"?n8n_api_key="+apiKey, options)
+				} catch (error) {
+					this.logger.info('credentialTest: exception:', error);
+				}
 				// console.log('credentialTest: Debug data:', JSON.stringify(response, null, 2));
-				Logger.info('credentialTest: response:', response);
+				this.logger.info('credentialTest: response:', {json: JSON.stringify(response, null, 2)});
 				if(response && response.error == 'n8n_no_audio_data'){
 					return {
 						status: 'OK',
@@ -179,15 +195,15 @@ export class TranscribeCom implements INodeType {
 		formData.append("file_template_speakers", audioOptSp == 'export_speakers_on'?"1":"0");
 		formData.append('file_data', bufferBlob, fileName);//{filename: fileName, contentType: binaryMimeType}
 		try {
-			const response = await this.helpers.httpRequestWithAuthentication.call(this,'transcribeComApi',
-			{
+			const options:IHttpRequestOptions = {
 				method: 'POST',
 				url: kTriggerAddOp,
 				headers: {
 					'Content-Type': 'multipart/form-data',
 				},
 				body: formData,
-			} as any);
+			};
+			const response:ITCResponse = await this.helpers.httpRequestWithAuthentication.call(this,'transcribeComApi', options);
 			if(!response || response["status"] == 'error'){
 				let error_str = 'contact_support';
 				if(response && response["error"]){
@@ -195,13 +211,13 @@ export class TranscribeCom implements INodeType {
 				}
 				if(error_str == 'n8n_user_not_found'){
 					error_str = 'Transcribe.Com account not found. Check your credentials and Invite code at https://transcribe.com/app';
-					Logger.error(error_str, response);
+					Logger.error(error_str, {message: response});
 				}
 				if(error_str == 'not_enough_time_credits'){
 					error_str = "You don't have enough time credits in your Transcribe.Com account. Add more time credits at https://transcribe.com/app";
-					Logger.error(error_str, response);
+					Logger.error(error_str, {message: response});
 				}
-				throw new NodeApiError(this.getNode(), response, {message: error_str});
+				throw new NodeApiError(this.getNode(), JSON.parse(JSON.stringify(response)), {message: error_str});
 			}
 			returnData.push({
 				json: {
