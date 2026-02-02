@@ -156,7 +156,12 @@ export class TranscribeCom implements INodeType {
 					error_str = response["error"];
 				}
 				if(error_str == 'n8n_user_not_found'){
-					Logger.error('Transcribe.Com Account not found. Check your credentials.', response);
+					error_str = 'Transcribe.Com account not found. Check your credentials and Invite code at https://transcribe.com/app';
+					Logger.error(error_str, response);
+				}
+				if(error_str == 'not_enough_time_credits'){
+					error_str = "You don't have enough time credits in your Transcribe.Com account. Add more time credits at https://transcribe.com/app";
+					Logger.error(error_str, response);
 				}
 				throw new NodeApiError(this.getNode(), response, {message: error_str});
 			}
