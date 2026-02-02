@@ -4,8 +4,8 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class TranscribeComApi implements ICredentialType {
-	name = 'TranscribeComApi';
+export class transcribeComApi implements ICredentialType {
+	name = 'transcribeComApi';
 	displayName = 'Transcribe.Com API';
 
 	documentationUrl = 'https://github.com/transcribe-app/n8n-nodes-transcribe-com?tab=readme-ov-file#credentials';

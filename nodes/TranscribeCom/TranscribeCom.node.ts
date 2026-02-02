@@ -2,8 +2,10 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
-	//IDataObject,
-	//JsonObject,
+	IDataObject,
+	ICredentialsDecrypted,
+	ICredentialTestFunctions,
+	INodeCredentialTestResult,
 } from 'n8n-workflow';
 import { IExecuteFunctions, NodeOperationError, NodeApiError, LoggerProxy as Logger } from 'n8n-workflow';
 import { NodeConnectionTypes } from 'n8n-workflow';
@@ -29,8 +31,9 @@ export class TranscribeCom implements INodeType {
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
-				name: 'TranscribeComApi',
+				name: 'transcribeComApi',
 				required: true,
+				testedBy: 'transcribeComApiConnectionTest',
 			},
 		],
 		requestDefaults: {
@@ -112,12 +115,47 @@ export class TranscribeCom implements INodeType {
 		]
 	};
 
+	methods = {
+		credentialTest: {
+			async transcribeComApiConnectionTest(
+				this: ICredentialTestFunctions,
+				credential: ICredentialsDecrypted,
+			): Promise<INodeCredentialTestResult> {
+				const credentials = credential.data as IDataObject;
+				const apiKey = credentials.apiKey;
+				const options: any = {
+					method: 'POST',
+					headers: {
+						Accept: 'application/json',
+					},
+					json: true,
+				};
+				var response:any = null;
+				try{
+					response = await this.helpers.request(kTriggerAddOp+"?n8n_api_key="+apiKey, options)
+				} catch (error) {}
+				// console.log('credentialTest: Debug data:', JSON.stringify(response, null, 2));
+				Logger.info('credentialTest: response:', response);
+				if(response && response.error == 'n8n_no_audio_data'){
+					return {
+						status: 'OK',
+						message: 'Connection successful',
+					};
+				}
+				return {
+					status: 'Error',
+					message: 'Invalid Invite Code',
+				};
+			}
+		}
+	}
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const item = items[0];
 		// const operation = this.getNodeParameter('operation', 0);// get_transcription
 		// const input = this.getInputData();
-		// console.log('Debug data:', JSON.stringify(input.all(), null, 2));
+		// console.log('execute Debug data:', JSON.stringify(input.all(), null, 2));
 		const returnData = [];
 		const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
 		if (!item.binary || !item.binary[binaryPropertyName]) {
@@ -132,7 +170,7 @@ export class TranscribeCom implements INodeType {
 		const audioLang = this.getNodeParameter('audioLanguage', 0) as string || "en";
 		const audioOptTs = this.getNodeParameter('withTimestamps', 0) as string || "export_timestamps_on";
 		const audioOptSp = this.getNodeParameter('withSpeakers', 0) as string || "export_speakers_on";
-		// const credentials = await this.getCredentials('TranscribeComApi');
+		// const credentials = await this.getCredentials('transcribeComApi');
 		// const apiKey = credentials.apiKey;
 		const formData = new FormData();
 		formData.append("file_lang", audioLang);
@@ -141,7 +179,7 @@ export class TranscribeCom implements INodeType {
 		formData.append("file_template_speakers", audioOptSp == 'export_speakers_on'?"1":"0");
 		formData.append('file_data', bufferBlob, fileName);//{filename: fileName, contentType: binaryMimeType}
 		try {
-			const response = await this.helpers.httpRequestWithAuthentication.call(this,'TranscribeComApi',
+			const response = await this.helpers.httpRequestWithAuthentication.call(this,'transcribeComApi',
 			{
 				method: 'POST',
 				url: kTriggerAddOp,
