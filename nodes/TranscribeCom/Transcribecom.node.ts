@@ -146,7 +146,7 @@ export class TranscribeCom implements INodeType {
 				let response:ITCResponse | null = null;
 				try{
 					const httpRequest = this.helpers.request;
-					response = await httpRequest(kTriggerAddOp+"?n8n_api_key="+apiKey, options)
+					response = await this.helpers.request(kTriggerAddOp+"?n8n_api_key="+apiKey, options)
 				} catch (error) {
 					this.logger.info('credentialTest: exception:', error);
 				}

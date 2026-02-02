@@ -34,7 +34,7 @@
             "dist/credentials/TranscribeComApi.credentials.js"
         ],
         "nodes": [
-            "dist/nodes/TranscribeCom/TranscribeCom.node.js"
+            "dist/nodes/TranscribeCom/Transcribecom.node.js"
         ]
     },
     "devDependencies": {
