@@ -1,11 +1,28 @@
 {
     "name": "n8n-nodes-transcribe-com",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Transcribe.com is an online service and processing API which allows to transcribe audio and video files and more!",
     "license": "MIT",
     "homepage": "https://transcribe.com",
     "keywords": [
-        "n8n-community-node-package"
+        "n8n-community-node-package",
+        "n8n",
+        "transcribe",
+        "transcription",
+        "speech-to-text",
+        "speech to text",
+        "audio",
+        "ai",
+        "automation",
+        "voice-to-text",
+        "speech-recognition",
+        "audio-transcription",
+        "audio2text",
+        "audio-processing",
+        "diarization",
+        "speaker-diarization",
+        "speaker-segmentation",
+        "conversational ai"
     ],
     "author": {
         "name": "Transcribe.Com Team",
