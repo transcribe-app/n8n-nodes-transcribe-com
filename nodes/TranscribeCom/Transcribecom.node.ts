@@ -145,8 +145,12 @@ export class TranscribeCom implements INodeType {
 				};
 				let response:ITCResponse | null = null;
 				try{
-					const httpRequest = this.helpers.request;
+					/* eslint-disable */
+					// Temporarily disabling due "no-deprecated-workflow-functions"
+					// There is a problem in credentials helper class in n8n codebase
+					// Issue: https://github.com/n8n-io/n8n/issues/25190
 					response = await this.helpers.request(kTriggerAddOp+"?n8n_api_key="+apiKey, options)
+					/* eslint-enable */
 				} catch (error) {
 					this.logger.info('credentialTest: exception:', error);
 				}
