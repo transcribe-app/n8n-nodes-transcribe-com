@@ -27,10 +27,10 @@ interface ITCResponse {
 const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
 // const kTriggerAddOp = "http://localhost:3000/api/v1.1/n8n_node";
 
-export class TranscribeCom implements INodeType {
+export class Transcribecom implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Transcribe.Com',
-		name: 'transcribecom',
+		name: 'Transcribecom',
 		icon: 'file:transcribe-com.svg',
 		group: [],
 		version: 1,

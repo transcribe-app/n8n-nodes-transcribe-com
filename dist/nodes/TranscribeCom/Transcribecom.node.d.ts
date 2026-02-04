@@ -1,6 +1,6 @@
 import type { INodeExecutionData, INodeType, INodeTypeDescription, ICredentialsDecrypted, ICredentialTestFunctions, INodeCredentialTestResult } from 'n8n-workflow';
 import { IExecuteFunctions } from 'n8n-workflow';
-export declare class TranscribeCom implements INodeType {
+export declare class Transcribecom implements INodeType {
     description: INodeTypeDescription;
     methods: {
         credentialTest: {

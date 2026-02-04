@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TranscribeCom = void 0;
+exports.Transcribecom = void 0;
 const n8n_workflow_1 = require("n8n-workflow");
 const n8n_workflow_2 = require("n8n-workflow");
 const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
 // const kTriggerAddOp = "http://localhost:3000/api/v1.1/n8n_node";
-class TranscribeCom {
+class Transcribecom {
     constructor() {
         this.description = {
             displayName: 'Transcribe.Com',
-            name: 'transcribecom',
+            name: 'Transcribecom',
             icon: 'file:transcribe-com.svg',
             group: [],
             version: 1,
@@ -211,5 +211,5 @@ class TranscribeCom {
         return this.prepareOutputData(returnData);
     }
 }
-exports.TranscribeCom = TranscribeCom;
+exports.Transcribecom = Transcribecom;
 //# sourceMappingURL=Transcribecom.node.js.map
