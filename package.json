@@ -48,7 +48,7 @@
         "n8nNodesApiVersion": 1,
         "strict": true,
         "credentials": [
-            "dist/credentials/TranscribeComApi.credentials.js"
+            "dist/credentials/transcribeComApi.credentials.js"
         ],
         "nodes": [
             "dist/nodes/TranscribeCom/Transcribecom.node.js"

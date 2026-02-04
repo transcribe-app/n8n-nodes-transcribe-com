@@ -1,6 +1,6 @@
 {
     "name": "n8n-nodes-transcribe-com",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Transcribe.com is an online service and processing API which allows to transcribe audio and video files and more!",
     "license": "MIT",
     "homepage": "https://transcribe.com",
@@ -48,7 +48,7 @@
         "n8nNodesApiVersion": 1,
         "strict": true,
         "credentials": [
-            "dist/credentials/TranscribeComApi.credentials.js"
+            "dist/credentials/transcribeComApi.credentials.js"
         ],
         "nodes": [
             "dist/nodes/TranscribeCom/Transcribecom.node.js"
