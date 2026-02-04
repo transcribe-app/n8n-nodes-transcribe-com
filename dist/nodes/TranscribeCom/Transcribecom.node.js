@@ -4,6 +4,7 @@ exports.TranscribeCom = void 0;
 const n8n_workflow_1 = require("n8n-workflow");
 const n8n_workflow_2 = require("n8n-workflow");
 const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
+// const kTriggerAddOp = "http://localhost:3000/api/v1.1/n8n_node";
 class TranscribeCom {
     constructor() {
         this.description = {
@@ -85,6 +86,22 @@ class TranscribeCom {
                     ],
                     default: 'export_speakers_on',
                 },
+                // // Operation
+                // {
+                // 	displayName: 'Transcribe',
+                // 	name: 'operation',
+                // 	type: 'options',
+                // 	noDataExpression: true,
+                // 	options: [
+                // 		{
+                // 			name: 'Transcribe Binary Property Input',
+                // 			action: 'Transcribe Binary Property Input',
+                // 			value: 'get_transcription',
+                // 			description: 'Transcribe audio/video file at Binary Property Input',
+                // 		},
+                // 	],
+                // 	default: 'get_transcription',
+                // },
             ]
         };
         this.methods = {
@@ -101,16 +118,17 @@ class TranscribeCom {
                     };
                     let response = null;
                     try {
-                    	/* eslint-disable */
-			// Temporarily disabling due "no-deprecated-workflow-functions"
-			// There is a problem in credentials helper class in n8n codebase
-			// Issue: https://github.com/n8n-io/n8n/issues/25190
+                        /* eslint-disable */
+                        // Temporarily disabling due "no-deprecated-workflow-functions"
+                        // There is a problem in credentials helper class in n8n codebase
+                        // Issue: https://github.com/n8n-io/n8n/issues/25190
                         response = await this.helpers.request(kTriggerAddOp + "?n8n_api_key=" + apiKey, options);
                         /* eslint-enable */
                     }
                     catch (error) {
                         this.logger.info('credentialTest: exception:', error);
                     }
+                    // console.log('credentialTest: Debug data:', JSON.stringify(response, null, 2));
                     this.logger.info('credentialTest: response:', { json: JSON.stringify(response, null, 2) });
                     if (response && response.error == 'n8n_no_audio_data') {
                         return {
@@ -129,6 +147,9 @@ class TranscribeCom {
     async execute() {
         const items = this.getInputData();
         const item = items[0];
+        // const operation = this.getNodeParameter('operation', 0);// get_transcription
+        // const input = this.getInputData();
+        // console.log('execute Debug data:', JSON.stringify(input.all(), null, 2));
         const returnData = [];
         const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0);
         if (!item.binary || !item.binary[binaryPropertyName]) {
@@ -139,15 +160,18 @@ class TranscribeCom {
         const binaryMimeType = binaryData.mimeType || 'audio/mpeg';
         const bufferBlob = new Blob([bufferData], { type: binaryMimeType });
         const fileName = binaryData.fileName || 'n8n_audio.mp3';
+        // const dataUrl = `data:${binaryMimeType};base64,${binaryData.toString('base64')}`;
         const audioLang = this.getNodeParameter('audioLanguage', 0) || "en";
         const audioOptTs = this.getNodeParameter('withTimestamps', 0) || "export_timestamps_on";
         const audioOptSp = this.getNodeParameter('withSpeakers', 0) || "export_speakers_on";
+        // const credentials = await this.getCredentials('transcribeComApi');
+        // const apiKey = credentials.apiKey;
         const formData = new FormData();
         formData.append("file_lang", audioLang);
         formData.append("file_name", fileName);
         formData.append("file_template_stamps", audioOptTs == 'export_timestamps_on' ? "1" : "0");
         formData.append("file_template_speakers", audioOptSp == 'export_speakers_on' ? "1" : "0");
-        formData.append('file_data', bufferBlob, fileName);
+        formData.append('file_data', bufferBlob, fileName); //{filename: fileName, contentType: binaryMimeType}
         try {
             const options = {
                 method: 'POST',
