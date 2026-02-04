@@ -78,10 +78,6 @@ web_modules/
 .next
 out
 
-# Nuxt.js build / generate output
-.nuxt
-dist
-
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
@@ -89,7 +85,8 @@ dist
 # public
 
 # vuepress build output
-.vuepress/dist
+.vuepress/
+
 
 # vuepress v2.x temp and cache directory
 .temp
@@ -99,7 +96,8 @@ dist
 .svelte-kit/
 
 # vitepress build output
-**/.vitepress/dist
+**/.vitepress/
+
 
 # vitepress cache directory
 **/.vitepress/cache
