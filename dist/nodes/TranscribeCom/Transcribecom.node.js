@@ -1,0 +1,191 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TranscribeCom = void 0;
+const n8n_workflow_1 = require("n8n-workflow");
+const n8n_workflow_2 = require("n8n-workflow");
+const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
+class TranscribeCom {
+    constructor() {
+        this.description = {
+            displayName: 'Transcribe.Com',
+            name: 'transcribecom',
+            icon: 'file:transcribe-com.svg',
+            group: [],
+            version: 1,
+            subtitle: 'Convert audio/video to text',
+            description: 'Get transcription of audio of video file',
+            defaults: {
+                name: 'Transcribe.Com'
+            },
+            usableAsTool: true,
+            inputs: [n8n_workflow_2.NodeConnectionTypes.Main],
+            outputs: [n8n_workflow_2.NodeConnectionTypes.Main],
+            credentials: [
+                {
+                    name: 'transcribeComApi',
+                    required: true,
+                    testedBy: 'transcribeComApiConnectionTest',
+                },
+            ],
+            requestDefaults: {
+                baseURL: 'https://ai.transcribe.com/api/1.1/n8n_node',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            },
+            properties: [
+                {
+                    displayName: 'Binary Property',
+                    name: 'binaryPropertyName',
+                    type: 'string',
+                    default: 'data',
+                    required: true,
+                    description: 'Name of the binary property containing the file to transcribe. Usually `data` when coming from another node.',
+                    placeholder: 'data',
+                },
+                {
+                    displayName: 'Audio Language',
+                    name: 'audioLanguage',
+                    type: 'options',
+                    required: true,
+                    options: [
+                        { name: 'Dutch', value: 'du' },
+                        { name: 'English', value: 'en' },
+                        { name: 'French', value: 'fr' },
+                        { name: 'German', value: 'de' },
+                        { name: 'Italian', value: 'it' },
+                        { name: 'Japanese', value: 'ja' },
+                        { name: 'Portuguese', value: 'pt' },
+                        { name: 'Russian', value: 'ru' },
+                        { name: 'Spanish', value: 'es' },
+                        { name: 'Traditional Chinese', value: 'zh' },
+                    ],
+                    default: 'en',
+                },
+                {
+                    displayName: 'With Timestamps',
+                    name: 'withTimestamps',
+                    type: 'options',
+                    required: true,
+                    options: [
+                        { name: 'YES', value: 'export_timestamps_on' },
+                        { name: 'NO', value: 'export_timestamps_off' },
+                    ],
+                    default: 'export_timestamps_on',
+                },
+                {
+                    displayName: 'With Speakers',
+                    name: 'withSpeakers',
+                    type: 'options',
+                    required: true,
+                    options: [
+                        { name: 'YES', value: 'export_speakers_on' },
+                        { name: 'NO', value: 'export_speakers_off' },
+                    ],
+                    default: 'export_speakers_on',
+                },
+            ]
+        };
+        this.methods = {
+            credentialTest: {
+                async transcribeComApiConnectionTest(credential) {
+                    const credentials = credential.data;
+                    const apiKey = credentials.apiKey;
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                            Accept: 'application/json',
+                        },
+                        json: true,
+                    };
+                    let response = null;
+                    try {
+                    	/* eslint-disable */
+			// Temporarily disabling due "no-deprecated-workflow-functions"
+			// There is a problem in credentials helper class in n8n codebase
+			// Issue: https://github.com/n8n-io/n8n/issues/25190
+                        response = await this.helpers.request(kTriggerAddOp + "?n8n_api_key=" + apiKey, options);
+                        /* eslint-enable */
+                    }
+                    catch (error) {
+                        this.logger.info('credentialTest: exception:', error);
+                    }
+                    this.logger.info('credentialTest: response:', { json: JSON.stringify(response, null, 2) });
+                    if (response && response.error == 'n8n_no_audio_data') {
+                        return {
+                            status: 'OK',
+                            message: 'Connection successful',
+                        };
+                    }
+                    return {
+                        status: 'Error',
+                        message: 'Invalid Invite Code',
+                    };
+                }
+            }
+        };
+    }
+    async execute() {
+        const items = this.getInputData();
+        const item = items[0];
+        const returnData = [];
+        const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0);
+        if (!item.binary || !item.binary[binaryPropertyName]) {
+            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `No binary data property "${binaryPropertyName}" found on item!`);
+        }
+        const binaryData = item.binary[binaryPropertyName];
+        const bufferData = await this.helpers.getBinaryDataBuffer(0, binaryPropertyName);
+        const binaryMimeType = binaryData.mimeType || 'audio/mpeg';
+        const bufferBlob = new Blob([bufferData], { type: binaryMimeType });
+        const fileName = binaryData.fileName || 'n8n_audio.mp3';
+        const audioLang = this.getNodeParameter('audioLanguage', 0) || "en";
+        const audioOptTs = this.getNodeParameter('withTimestamps', 0) || "export_timestamps_on";
+        const audioOptSp = this.getNodeParameter('withSpeakers', 0) || "export_speakers_on";
+        const formData = new FormData();
+        formData.append("file_lang", audioLang);
+        formData.append("file_name", fileName);
+        formData.append("file_template_stamps", audioOptTs == 'export_timestamps_on' ? "1" : "0");
+        formData.append("file_template_speakers", audioOptSp == 'export_speakers_on' ? "1" : "0");
+        formData.append('file_data', bufferBlob, fileName);
+        try {
+            const options = {
+                method: 'POST',
+                url: kTriggerAddOp,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                body: formData,
+            };
+            const response = await this.helpers.httpRequestWithAuthentication.call(this, 'transcribeComApi', options);
+            if (!response || response["status"] == 'error') {
+                let error_str = 'contact_support';
+                if (response && response["error"]) {
+                    error_str = response["error"];
+                }
+                if (error_str == 'n8n_user_not_found') {
+                    error_str = 'Transcribe.Com account not found. Check your credentials and Invite code at https://transcribe.com/app';
+                    n8n_workflow_1.LoggerProxy.error(error_str, { message: response });
+                }
+                if (error_str == 'not_enough_time_credits') {
+                    error_str = "You don't have enough time credits in your Transcribe.Com account. Add more time credits at https://transcribe.com/app";
+                    n8n_workflow_1.LoggerProxy.error(error_str, { message: response });
+                }
+                throw new n8n_workflow_1.NodeApiError(this.getNode(), JSON.parse(JSON.stringify(response)), { message: error_str });
+            }
+            returnData.push({
+                json: {
+                    transcription_status: response.status,
+                    transcription_text: response.text
+                },
+            });
+        }
+        catch (error) {
+            n8n_workflow_1.LoggerProxy.error('Error starting transcription', { error: error.message });
+            throw new n8n_workflow_1.NodeApiError(this.getNode(), error);
+        }
+        return this.prepareOutputData(returnData);
+    }
+}
+exports.TranscribeCom = TranscribeCom;
+//# sourceMappingURL=Transcribecom.node.js.map
