@@ -30,7 +30,7 @@ const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
 export class Transcribecom implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Transcribe.Com',
-		name: 'transcribeCom',
+		name: 'transcribecom',
 		icon: 'file:transcribe-com.svg',
 		group: [],
 		version: 1,

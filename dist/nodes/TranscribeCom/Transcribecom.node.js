@@ -9,7 +9,7 @@ class Transcribecom {
     constructor() {
         this.description = {
             displayName: 'Transcribe.Com',
-            name: 'transcribeCom',
+            name: 'transcribecom',
             icon: 'file:transcribe-com.svg',
             group: [],
             version: 1,
