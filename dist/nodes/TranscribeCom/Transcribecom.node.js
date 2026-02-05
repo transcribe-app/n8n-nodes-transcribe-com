@@ -180,6 +180,7 @@ class Transcribecom {
                     'Content-Type': 'multipart/form-data',
                 },
                 body: formData,
+                timeout: 10 * 60 * 1000, // 10 min
             };
             const response = await this.helpers.httpRequestWithAuthentication.call(this, 'transcribeComApi', options);
             if (!response || response["status"] == 'error') {
