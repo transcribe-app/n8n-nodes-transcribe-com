@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Transcribecom = void 0;
 const n8n_workflow_1 = require("n8n-workflow");
 const n8n_workflow_2 = require("n8n-workflow");
-const kTriggerAddOp = "https://ai.transcribe.com/api/v1.1/n8n_node";
-// const kTriggerAddOp = "http://localhost:3000/api/v1.1/n8n_node";
+const kTriggerAddOp = "https://ai.transcribe.com/mcp/n8n_node";
+// const kTriggerAddOp = "http://localhost:3000/mcp/n8n_node";
 class Transcribecom {
     constructor() {
         this.description = {
